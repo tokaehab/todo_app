@@ -14,6 +14,7 @@ class _AuthFormState extends State<AuthForm> {
   String _email = '';
   String _password = '';
   String _username = '';
+  bool _obscure = true;
 
   void _trySubmit() {
     final _isValid = _formKey.currentState.validate();
@@ -72,8 +73,18 @@ class _AuthFormState extends State<AuthForm> {
                 key: ValueKey('password'),
                 decoration: InputDecoration(
                   labelText: 'Password',
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      !_obscure ? Icons.visibility : Icons.visibility_off,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _obscure = !_obscure;
+                      });
+                    },
+                  ),
                 ),
-                obscureText: true,
+                obscureText: _obscure,
                 validator: (value) {
                   if (value.length < 8)
                     return 'Password should be at least 8 characters';
@@ -96,6 +107,8 @@ class _AuthFormState extends State<AuthForm> {
                         widget.isLogin ? 'Log in' : 'Sign up',
                         style: TextStyle(
                           color: Colors.white,
+                          fontFamily:
+                              Theme.of(context).textTheme.title.fontFamily,
                         ),
                       ),
                       color: Theme.of(context).primaryColor,
