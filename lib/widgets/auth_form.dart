@@ -10,11 +10,20 @@ class AuthForm extends StatefulWidget {
 }
 
 class _AuthFormState extends State<AuthForm> {
+  final _passwordFocusNode = FocusNode();
+  final _usernameFocusNode = FocusNode();
   final _formKey = GlobalKey<FormState>();
   String _email = '';
   String _password = '';
   String _username = '';
   bool _obscure = true;
+
+  @override
+  void dispose() {
+    _passwordFocusNode.dispose();
+    _usernameFocusNode.dispose();
+    super.dispose();
+  }
 
   void _trySubmit() {
     final _isValid = _formKey.currentState.validate();
@@ -53,6 +62,12 @@ class _AuthFormState extends State<AuthForm> {
                 onSaved: (value) {
                   _email = value;
                 },
+                onFieldSubmitted: (_) {
+                  if (widget.isLogin)
+                    FocusScope.of(context).requestFocus(_passwordFocusNode);
+                  else
+                    FocusScope.of(context).requestFocus(_usernameFocusNode);
+                },
               ),
               if (!widget.isLogin)
                 TextFormField(
@@ -60,6 +75,7 @@ class _AuthFormState extends State<AuthForm> {
                   decoration: InputDecoration(
                     labelText: 'Username',
                   ),
+                  focusNode: _usernameFocusNode,
                   validator: (value) {
                     if (value.length < 4)
                       return 'Username should be at least 4 characters';
@@ -67,6 +83,9 @@ class _AuthFormState extends State<AuthForm> {
                   },
                   onSaved: (value) {
                     _username = value;
+                  },
+                  onFieldSubmitted: (_) {
+                    FocusScope.of(context).requestFocus(_passwordFocusNode);
                   },
                 ),
               TextFormField(

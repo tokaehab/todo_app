@@ -64,6 +64,7 @@ class _TasksScreenState extends State<TasksScreen> {
               elevation: 5,
               margin: const EdgeInsets.all(5),
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
                   Padding(
                     padding: const EdgeInsets.all(8.0),
@@ -77,9 +78,6 @@ class _TasksScreenState extends State<TasksScreen> {
                             Theme.of(context).textTheme.title.fontFamily,
                       ),
                     ),
-                  ),
-                  SizedBox(
-                    width: 290,
                   ),
                   IconButton(
                       icon: Icon(Icons.add),

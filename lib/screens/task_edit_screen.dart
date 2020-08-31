@@ -14,12 +14,7 @@ class TaskEditScreen extends StatefulWidget {
 }
 
 class _TaskEditScreenState extends State<TaskEditScreen> {
-  @override
-  void initState() {
-    super.initState();
-    Provider.of<TasksProvider>(context, listen: false).initializating(context);
-  }
-
+  final _descirptionFocusNode = FocusNode();
   final _formKey = GlobalKey<FormState>();
   var _isinit = true;
   bool _editStartDate = false;
@@ -37,10 +32,20 @@ class _TaskEditScreenState extends State<TaskEditScreen> {
   );
 
   void timePicker(bool date) {
+    try {
+      FocusManager.instance.primaryFocus.unfocus();
+    } catch (error) {
+      debugPrint(error.message);
+    }
     DatePicker.showDateTimePicker(
       context,
       showTitleActions: true,
       onConfirm: (datee) {
+        try {
+          FocusManager.instance.primaryFocus.unfocus();
+        } catch (error) {
+          debugPrint(error.message);
+        }
         setState(() {
           if (date) {
             _editedTask.date = datee;
@@ -81,19 +86,20 @@ class _TaskEditScreenState extends State<TaskEditScreen> {
           'title': _editedTask.title,
           'description': _editedTask.description,
           'date': argument['date'],
-          'dueDate': argument['dueDate'],
+          'dueDate': _editedTask.dueDate,
           'notificationId': _editedTask.notificationId,
           'done': _editedTask.done.toString(),
         };
+        _editedTask.dueDate = _editedTask.dueDate;
       } else {
         _initValues['date'] = argument['date'];
         _initValues['dueDate'] = argument['dueDate'];
         _initValues['notificationId'] =
             Provider.of<TasksProvider>(context, listen: false).getSize();
         _editedTask.notificationId = _initValues['notificationId'];
+        _editedTask.dueDate = argument['dueDate'];
       }
       _editedTask.date = argument['date'];
-      _editedTask.dueDate = argument['dueDate'];
     }
     _isinit = false;
   }
@@ -135,11 +141,15 @@ class _TaskEditScreenState extends State<TaskEditScreen> {
         await showDialog(
             context: context,
             builder: (BuildContext context) => AlertDialog(
-                  title: Text(
-                    'Notification won\'t be scheduled',
-                    style: Theme.of(context).textTheme.title,
-                  ),
-                  content: Text('The due date is already passed'),
+                  title: Text('Notification won\'t be scheduled',
+                      style: Theme.of(context).textTheme.title.copyWith(
+                            fontFamily: 'Galada',
+                          )),
+                  content: _editedTask.dueDate.isBefore(DateTime.now())
+                      ? Text(
+                          'The due date is already passed',
+                        )
+                      : null,
                   actions: <Widget>[
                     FlatButton(
                         onPressed: () {
@@ -176,6 +186,12 @@ class _TaskEditScreenState extends State<TaskEditScreen> {
     });
     FocusScope.of(context).unfocus();
     Navigator.of(context).pop();
+  }
+
+  @override
+  void dispose() {
+    _descirptionFocusNode.dispose();
+    super.dispose();
   }
 
   @override
@@ -219,10 +235,15 @@ class _TaskEditScreenState extends State<TaskEditScreen> {
                             return 'Please Enter a valid Title';
                           return null;
                         },
+                        onFieldSubmitted: (_) {
+                          FocusScope.of(context)
+                              .requestFocus(_descirptionFocusNode);
+                        },
                       ),
                       TextFormField(
                         decoration: InputDecoration(labelText: 'Description'),
                         maxLines: 2,
+                        focusNode: _descirptionFocusNode,
                         initialValue: _initValues['description'],
                         onSaved: (value) {
                           _editedTask = Task(
@@ -241,6 +262,7 @@ class _TaskEditScreenState extends State<TaskEditScreen> {
                         },
                       ),
                       Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: <Widget>[
                           Padding(
                             padding: const EdgeInsets.only(top: 15.0, left: 8),
@@ -250,9 +272,6 @@ class _TaskEditScreenState extends State<TaskEditScreen> {
                                   fontSize: 25 *
                                       MediaQuery.of(context).textScaleFactor),
                             ),
-                          ),
-                          SizedBox(
-                            width: 235,
                           ),
                           IconButton(
                               color: Theme.of(context).primaryColorDark,
@@ -275,6 +294,7 @@ class _TaskEditScreenState extends State<TaskEditScreen> {
                           Padding(
                             padding: const EdgeInsets.only(top: 15.0, left: 8),
                             child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: <Widget>[
                                 Text(
                                   'Start Date',
@@ -286,7 +306,6 @@ class _TaskEditScreenState extends State<TaskEditScreen> {
                                               MediaQuery.of(context)
                                                   .textScaleFactor),
                                 ),
-                                SizedBox(width: 230),
                                 IconButton(
                                     icon: Icon(_editStartDate
                                         ? Icons.remove
@@ -304,6 +323,7 @@ class _TaskEditScreenState extends State<TaskEditScreen> {
                           Padding(
                             padding: const EdgeInsets.only(top: 15.0, left: 8),
                             child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: <Widget>[
                                 Text(
                                   'Due Date',
@@ -315,13 +335,13 @@ class _TaskEditScreenState extends State<TaskEditScreen> {
                                               MediaQuery.of(context)
                                                   .textScaleFactor),
                                 ),
-                                SizedBox(width: 240),
                                 IconButton(
                                     icon: Icon(_editedDueDate
                                         ? Icons.remove
                                         : Icons.edit),
                                     onPressed: () {
                                       timePicker(false);
+
                                       if (_editedTask.dueDate
                                           .isBefore(DateTime.now())) {
                                         setState(() {
@@ -332,7 +352,6 @@ class _TaskEditScreenState extends State<TaskEditScreen> {
                               ],
                             ),
                           ),
-                          // if (_editedDueDate) timePicker(false),
                         ],
                       ),
                       Padding(

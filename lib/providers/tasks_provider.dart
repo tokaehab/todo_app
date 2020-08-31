@@ -83,6 +83,7 @@ class TasksProvider with ChangeNotifier {
         .collection('users')
         .document(userId)
         .collection('tasks')
+        .orderBy('dueDate')
         .getDocuments();
     tasks.clear();
     tasksList.documents.forEach((task) {
