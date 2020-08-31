@@ -104,6 +104,7 @@ class _AuthFormState extends State<AuthForm> {
                   ),
                 ),
                 obscureText: _obscure,
+                focusNode: _passwordFocusNode,
                 validator: (value) {
                   if (value.length < 8)
                     return 'Password should be at least 8 characters';
